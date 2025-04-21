@@ -1,8 +1,0 @@
----
-- name: Install and configure nginx with dynamic port
-  become: yes
-  hosts: all
-
-  roles:
-    - role: nginx
-   
