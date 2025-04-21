@@ -1,30 +1,32 @@
 ---
-# tasks file for nginx
-    - name: Install nginx
-      apt:
-        name: nginx
-        state: latest
-        update_cache: yes
+- name: Install nginx
+  apt:
+    name: nginx
+    state: latest
+    update_cache: yes
 
+- name: Get Nginx port from Consul KV
+  set_fact:
+    consul_nginx_port: "{{ lookup('consul_kv', 'config/nginx/port') }}"
+  
+- name: Print the Nginx port to be used
+  debug:
+    msg: "Nginx will run on port: {{ consul_nginx_port }}"
 
-    - name: Print the Nginx port
-      debug:
-        msg: "Nginx will run on port: {{ nginx_port }}"
+- name: Deploy nginx.conf rendered with the selected port
+  template:
+    src: templates/nginx.conf.j2 
+    dest: /etc/nginx/sites-available/default
+    owner: root
+    group: root
+    mode: '0644'
+  notify: Restart Nginx
+  tags:
+    - deploy
 
-    - name: Deploy nginx.conf rendered with the selected port
-      template:
-        src: templates/nginx.conf.j2
-        dest: /etc/nginx/sites-available/default
-        owner: root
-        group: root
-        mode: '0644'
-      notify: Restart Nginx
-      tags:
-        - deploy
-
-    - name: custom HTML page
-      copy:
-        src: files/index.html 
-        dest: /var/www/html/index.html
-      notify: Restart Nginx
+- name: custom HTML page
+  copy:
+    src: files/index.html
+    dest: /var/www/html/index.html
+  notify: Restart Nginx
 
