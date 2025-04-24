@@ -29,22 +29,36 @@ pipeline {
             }
         }
 
-        stage('Run Ansible Playbook') {
-            agent {
-                dockerfile true // Tells Jenkins to build the Dockerfile from the checkout directory
-            }
-            steps {
-                script {
-                    sh "echo 'Checking for required template file...'; ls -l nginx/templates/nginx.conf.j2 || echo 'WARNING: Template file not found!'"
-                    echo "Running Ansible playbook: ${PLAYBOOK_FILE}"
-                    sh """
-                    export ANSIBLE_HOST_KEY_CHECKING=False
-                    # Ensure ansible command is found in the container's PATH
-                    ansible-playbook --private-key ${SSH_KEY_PATH} -i ${INVENTORY_FILE} ${PLAYBOOK_FILE}
-                    """
-                }
-            }
+       stage('Run Ansible Playbook') {
+    agent {
+        dockerfile true
+    }
+    steps {
+        script {
+            sh "echo 'Checking for required template file...'; ls -l nginx/templates/nginx.conf.j2 || echo 'WARNING: Template file not found!'"
+
+            echo "Running Ansible playbook: ${PLAYBOOK_FILE}"
+
+           
+            sh """
+            #!/bin/bash
+            export ANSIBLE_HOST_KEY_CHECKING=False
+
+            # Define a writable temp path within the workspace
+            export ANSIBLE_LOCAL_TEMP='./ansible-tmp' # Use relative path within workspace
+
+            # Ensure the directory exists (use -p for safety)
+            mkdir -p "\$ANSIBLE_LOCAL_TEMP"
+
+            echo "Using Ansible temp path: \$ANSIBLE_LOCAL_TEMP"
+
+            # Run the playbook
+            ansible-playbook --private-key ${SSH_KEY_PATH} -i ${INVENTORY_FILE} ${PLAYBOOK_FILE}
+            """
+            // --- END OF MODIFICATION ---
         }
+    }
+}
     }
 
     post {
