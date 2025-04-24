@@ -6,8 +6,9 @@
     update_cache: yes
 
 - name: Get Nginx port from Consul KV
-  set_fact:
-    consul_nginx_port: "{{ lookup('consul_kv', 'config/nginx/port') }}"
+  ansible.builtin.set_fact:
+    nginx_port_from_consul: "{{ lookup('consul_kv', 'config/nginx/port', host='consul', port=8500) }}"
+
   
 - name: Print the Nginx port to be used
   debug:
