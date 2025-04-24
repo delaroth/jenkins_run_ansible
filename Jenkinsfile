@@ -59,8 +59,8 @@ pipeline {
                     echo "Running Ansible playbook: ${PLAYBOOK_FILE}"
                     sh """
                     export ANSIBLE_HOST_KEY_CHECKING=False
-                    # Run playbook - no ANSIBLE_LOCAL_TEMP needed with jenkins/jenkins:lts base
-                    ansible-playbook --private-key ${SSH_KEY_PATH} -i ${INVENTORY_FILE} ${PLAYBOOK_FILE}
+                    # Add -vvv for maximum verbosity
+                    ansible-playbook -vvv --private-key ${SSH_KEY_PATH} -i ${INVENTORY_FILE} ${PLAYBOOK_FILE}
                     """
                 }
             }
