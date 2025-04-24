@@ -1,5 +1,5 @@
 pipeline {
-    agent any // Runs checkout and key prep on any available agent (e.g., master)
+    agent any 
 
     environment {
         INVENTORY_FILE = 'inventory.ini'
