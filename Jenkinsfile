@@ -42,11 +42,6 @@ pipeline {
                 echo "Checking out code again within Ansible stage..."
                 git url: GIT_REPO_URL, branch: GIT_BRANCH
 
-                // **** ADDED STEP: Verify template content ****
-                echo "Verifying content of nginx/templates/nginx.conf.j2:"
-                sh 'cat nginx/templates/nginx.conf.j2 || echo "Template file not found!"'
-                // **** END ADDED STEP ****
-
                 // Now run the rest of the steps inside the Docker container
                 agent {
                     dockerfile {
@@ -55,11 +50,15 @@ pipeline {
                 }
                 // Steps inside the container
                 script {
-                    // Removed the ls check here as it's redundant with the cat above
-                    // sh "echo 'Checking for required template file...'; ls -l nginx/templates/nginx.conf.j2 || echo 'WARNING: Template file not found!'"
                     echo "Running Ansible playbook: ${PLAYBOOK_FILE}"
                     sh """
                     export ANSIBLE_HOST_KEY_CHECKING=False
+                    # **** ADDED STEP: Verify template content INSIDE container ****
+                    echo "Verifying content of nginx/templates/nginx.conf.j2 INSIDE container:"
+                    cat nginx/templates/nginx.conf.j2 || echo "Template file not found!"
+                    echo "-----------------------------------------------------"
+                    # **** END ADDED STEP ****
+
                     # Add -vvv for maximum verbosity
                     ansible-playbook -vvv --private-key ${SSH_KEY_PATH} -i ${INVENTORY_FILE} ${PLAYBOOK_FILE}
                     """
