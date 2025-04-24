@@ -10,20 +10,19 @@
     consul_nginx_port: "{{ lookup('consul_kv', 'config/nginx/port', host='consul', port=8500) }}"
 
   
-- name: Print the Nginx port to be used
-  ansible.builtin.debug:
-    msg: "The port retrieved from Consul is {{ consul_nginx_port }}" # Using the wrong name!
-
+# In nginx/tasks/main.yml
 - name: Deploy nginx.conf rendered with the selected port
-  ansible.builtin.template: # Use fully qualified name for clarity
+  ansible.builtin.template:
     src: templates/nginx.conf.j2
     dest: /etc/nginx/sites-available/default
     owner: root
     group: root
     mode: '0644'
-  # Explicitly pass the variable to the template context
   vars:
-    consul_nginx_port: "{{ consul_nginx_port }}" # Pass the fact under the name the template expects
+    # Define the variable the template actually uses
+    consul_nginx_port: "{{ consul_nginx_port }}"
+    # ALSO define the variable the error complains about, just in case
+    nginx_port: "{{ consul_nginx_port }}"
   notify: Restart Nginx
   tags:
     - deploy
