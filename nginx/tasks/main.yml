@@ -7,12 +7,12 @@
 
 - name: Get Nginx port from Consul KV
   ansible.builtin.set_fact:
-    nginx_port_from_consul: "{{ lookup('consul_kv', 'config/nginx/port', host='consul', port=8500) }}"
+    consul_nginx_port: "{{ lookup('consul_kv', 'config/nginx/port', host='consul', port=8500) }}"
 
   
 - name: Print the Nginx port to be used
-  debug:
-    msg: "Nginx will run on port: {{ consul_nginx_port }}"
+  ansible.builtin.debug:
+    msg: "The port retrieved from Consul is {{ consul_nginx_port }}" # Using the wrong name!
 
 - name: Deploy nginx.conf rendered with the selected port
   template:
