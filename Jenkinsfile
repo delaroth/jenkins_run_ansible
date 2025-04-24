@@ -55,7 +55,7 @@ pipeline {
             # Run the playbook
             ansible-playbook --private-key ${SSH_KEY_PATH} -i ${INVENTORY_FILE} ${PLAYBOOK_FILE}
             """
-            // --- END OF MODIFICATION ---
+        
         }
     }
 }
