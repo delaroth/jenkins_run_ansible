@@ -17,8 +17,6 @@ pipeline {
                 git url: GIT_REPO_URL, branch: GIT_BRANCH
                 echo 'Initial code checkout complete...'
                  sh 'ls -la'
-                 // Optional: Verify Dockerfile content here if needed
-                 // sh 'echo "Dockerfile content:"; cat Dockerfile || echo "Dockerfile not found"'
             }
         }
 
@@ -44,18 +42,21 @@ pipeline {
                 echo "Checking out code again within Ansible stage..."
                 git url: GIT_REPO_URL, branch: GIT_BRANCH
 
+                // **** ADDED STEP: Verify template content ****
+                echo "Verifying content of nginx/templates/nginx.conf.j2:"
+                sh 'cat nginx/templates/nginx.conf.j2 || echo "Template file not found!"'
+                // **** END ADDED STEP ****
+
                 // Now run the rest of the steps inside the Docker container
                 agent {
                     dockerfile {
-                        // Explicitly state the Dockerfile name, although 'Dockerfile' is default
                         filename 'Dockerfile'
-                        // Force Docker to always pull the base image (optional, helps ensure freshness)
-                        // pull true
                     }
                 }
                 // Steps inside the container
                 script {
-                    sh "echo 'Checking for required template file...'; ls -l nginx/templates/nginx.conf.j2 || echo 'WARNING: Template file not found!'"
+                    // Removed the ls check here as it's redundant with the cat above
+                    // sh "echo 'Checking for required template file...'; ls -l nginx/templates/nginx.conf.j2 || echo 'WARNING: Template file not found!'"
                     echo "Running Ansible playbook: ${PLAYBOOK_FILE}"
                     sh """
                     export ANSIBLE_HOST_KEY_CHECKING=False
